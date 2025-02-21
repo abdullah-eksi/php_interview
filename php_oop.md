@@ -446,44 +446,374 @@ Bu desende, **Subject** (gözlemlenen) bir değişiklik yapınca, **Observer** (
 
 ### **2.10 Factory Design Pattern nasıl çalışır?**  
 ✍ **Cevap:**  
+Factory Design Pattern, nesne oluşturma işlemini merkezileştirir. Bir arayüz veya soyut sınıf üzerinden nesne oluşturulur ve bu sayede kod esnekliği artar. Örnek:
+
+```php
+interface Product {
+    public function getName();
+}
+
+class ProductA implements Product {
+    public function getName() {
+        return "Product A";
+    }
+}
+
+class ProductB implements Product {
+    public function getName() {
+        return "Product B";
+    }
+}
+
+class ProductFactory {
+    public static function create($type) {
+        return match ($type) {
+            'A' => new ProductA(),
+            'B' => new ProductB(),
+            default => throw new Exception("Geçersiz ürün tipi"),
+        };
+    }
+}
+
+$product = ProductFactory::create('A');
+echo $product->getName(); // Çıktı: Product A
+```
+
+---
 
 ### **2.11 Builder Design Pattern nedir ve PHP’de nasıl uygulanır?**  
 ✍ **Cevap:**  
+Builder Design Pattern, karmaşık nesnelerin adım adım oluşturulmasını sağlar. Örnek:
+
+```php
+class Product {
+    private $parts = [];
+
+    public function addPart($part) {
+        $this->parts[] = $part;
+    }
+
+    public function showParts() {
+        return implode(", ", $this->parts);
+    }
+}
+
+class ProductBuilder {
+    private $product;
+
+    public function __construct() {
+        $this->product = new Product();
+    }
+
+    public function buildPartA() {
+        $this->product->addPart("Part A");
+    }
+
+    public function buildPartB() {
+        $this->product->addPart("Part B");
+    }
+
+    public function getProduct() {
+        return $this->product;
+    }
+}
+
+$builder = new ProductBuilder();
+$builder->buildPartA();
+$builder->buildPartB();
+$product = $builder->getProduct();
+echo $product->showParts(); // Çıktı: Part A, Part B
+```
+
+---
 
 ### **2.12 Prototype Design Pattern PHP’de nasıl kullanılır?**  
 ✍ **Cevap:**  
+Prototype Design Pattern, nesnelerin kopyalanarak çoğaltılmasını sağlar. Örnek:
+
+```php
+class Product {
+    public $name;
+
+    public function __clone() {
+        // Kopyalama işlemi sırasında özel işlemler yapılabilir.
+    }
+}
+
+$product1 = new Product();
+$product1->name = "Product A";
+$product2 = clone $product1;
+echo $product2->name; // Çıktı: Product A
+```
+
+---
 
 ### **2.13 Strategy Design Pattern nasıl çalışır?**  
 ✍ **Cevap:**  
+Strategy Design Pattern, algoritmaları birbirinden ayırır ve runtime'da değiştirilebilir hale getirir. Örnek:
+
+```php
+interface Strategy {
+    public function execute();
+}
+
+class StrategyA implements Strategy {
+    public function execute() {
+        return "Strategy A";
+    }
+}
+
+class StrategyB implements Strategy {
+    public function execute() {
+        return "Strategy B";
+    }
+}
+
+class Context {
+    private $strategy;
+
+    public function __construct(Strategy $strategy) {
+        $this->strategy = $strategy;
+    }
+
+    public function executeStrategy() {
+        return $this->strategy->execute();
+    }
+}
+
+$context = new Context(new StrategyA());
+echo $context->executeStrategy(); // Çıktı: Strategy A
+```
+
+---
 
 ### **2.14 PHP’de Reflection API nedir ve nasıl kullanılır?**  
 ✍ **Cevap:**  
+Reflection API, sınıflar, metodlar ve özellikler hakkında bilgi almak için kullanılır. Örnek:
+
+```php
+class Example {
+    public function test() {
+        return "Test";
+    }
+}
+
+$reflection = new ReflectionClass('Example');
+$methods = $reflection->getMethods();
+print_r($methods); // Sınıfın metodlarını listeler
+```
+
+---
 
 ### **2.15 Magic Methods (sihirli metotlar) nedir? Örnek vererek açıklayınız.**  
 ✍ **Cevap:**  
+Magic Methods, özel durumlarda otomatik olarak çağrılan metotlardır. Örnek:
 
+```php
+class Example {
+    public function __construct() {
+        echo "Nesne oluşturuldu.";
+    }
 
-### **2.16 PHP’de nesne klonlama nasıl yapılır? (`clone` anahtar kelimesi ve `__clone()` metodu nasıl çalışır?)**  
+    public function __toString() {
+        return "Bu bir örnek nesne.";
+    }
+}
+
+$example = new Example(); // Çıktı: Nesne oluşturuldu.
+echo $example; // Çıktı: Bu bir örnek nesne.
+```
+
+---
+
+### **2.16 PHP’de nesne klonlama nasıl yapılır? (clone anahtar kelimesi ve __clone() metodu nasıl çalışır?)**  
 ✍ **Cevap:**  
+`clone` anahtar kelimesi ile nesne kopyalanır. `__clone()` metodu, kopyalama sırasında özel işlemler yapmak için kullanılır. Örnek:
 
-### **2.17 PHP’de immutable (değiştirilemez) nesneler nasıl oluşturulur?**  
+```php
+class Product {
+    public $name;
+
+    public function __clone() {
+        $this->name = "Kopya " . $this->name;
+    }
+}
+
+$product1 = new Product();
+$product1->name = "Product A";
+$product2 = clone $product1;
+echo $product2->name; // Çıktı: Kopya Product A
+```
+
+---
+
+### **2.17 PHP’de immutable (değiştirlemez) nesneler nasıl oluşturulur?**  
 ✍ **Cevap:**  
+Immutable nesneler, özellikleri değiştirilemeyen nesnelerdir. Örnek:
+
+```php
+class ImmutableProduct {
+    private $name;
+
+    public function __construct($name) {
+        $this->name = $name;
+    }
+
+    public function getName() {
+        return $this->name;
+    }
+}
+
+$product = new ImmutableProduct("Product A");
+echo $product->getName(); // Çıktı: Product A
+```
+
+---
 
 ### **2.18 Fluent Interface (zincirleme metod çağrımı) nedir? Örnek vererek açıklayınız.**  
 ✍ **Cevap:**  
+Fluent Interface, metod çağrılarını zincirleme şeklinde yapmaya olanak tanır. Örnek:
+
+```php
+class Product {
+    private $name;
+    private $price;
+
+    public function setName($name) {
+        $this->name = $name;
+        return $this;
+    }
+
+    public function setPrice($price) {
+        $this->price = $price;
+        return $this;
+    }
+
+    public function getDetails() {
+        return "Name: $this->name, Price: $this->price";
+    }
+}
+
+$product = new Product();
+echo $product->setName("Product A")->setPrice(100)->getDetails();
+// Çıktı: Name: Product A, Price: 100
+```
+
+---
 
 ### **2.19 OOP'de Dependency Inversion Principle (Bağımlılığı Tersine Çevirme Prensibi) nasıl uygulanır?**  
 ✍ **Cevap:**  
+Üst seviye modüller, alt seviye modüllere değil, soyutlamalara bağlı olmalıdır. Örnek:
+
+```php
+interface Database {
+    public function connect();
+}
+
+class MySQL implements Database {
+    public function connect() {
+        return "MySQL bağlantısı kuruldu.";
+    }
+}
+
+class User {
+    private $database;
+
+    public function __construct(Database $database) {
+        $this->database = $database;
+    }
+
+    public function connect() {
+        return $this->database->connect();
+    }
+}
+
+$user = new User(new MySQL());
+echo $user->connect(); // Çıktı: MySQL bağlantısı kuruldu.
+```
+
+---
 
 ### **2.20 PHP’de Object Pooling nedir ve ne zaman kullanılır?**  
 ✍ **Cevap:**  
+Object Pooling, nesnelerin yeniden kullanılmasını sağlayarak performansı artırır. Örnek:
+
+```php
+class ObjectPool {
+    private $pool = [];
+
+    public function getObject() {
+        if (empty($this->pool)) {
+            return new stdClass();
+        }
+        return array_pop($this->pool);
+    }
+
+    public function releaseObject($object) {
+        $this->pool[] = $object;
+    }
+}
+
+$pool = new ObjectPool();
+$object = $pool->getObject();
+$pool->releaseObject($object);
+```
+
+---
 
 ### **2.21 Data Mapper ve Active Record desenleri arasındaki farklar nelerdir?**  
 ✍ **Cevap:**  
+- **Active Record:** Veritabanı tabloları ile nesneler arasında doğrudan eşleme yapar.
+- **Data Mapper:** Veritabanı işlemlerini nesnelerden ayırır, daha esnek bir yapı sunar.
+
+---
 
 ### **2.22 PHP’de Middleware mantığı nasıl çalışır?**  
 ✍ **Cevap:**  
+Middleware, HTTP istekleri ve cevapları arasında işlem yapar. Örnek:
+
+```php
+class Middleware {
+    public function handle($request, $next) {
+        echo "Middleware çalıştı. ";
+        return $next($request);
+    }
+}
+
+$middleware = new Middleware();
+$response = $middleware->handle("Request", function($request) {
+    return "Response";
+});
+echo $response; // Çıktı: Middleware çalıştı. Response
+```
+
+---
 
 ### **2.23 PHP’de Polymorphism (çok biçimlilik) nasıl çalışır?**  
 ✍ **Cevap:**  
+Polymorphism, farklı sınıfların aynı arayüzü farklı şekillerde uygulamasıdır. Örnek:
+
+```php
+interface Shape {
+    public function draw();
+}
+
+class Circle implements Shape {
+    public function draw() {
+        return "Circle çizildi.";
+    }
+}
+
+class Square implements Shape {
+    public function draw() {
+        return "Square çizildi.";
+    }
+}
+
+$shapes = [new Circle(), new Square()];
+foreach ($shapes as $shape) {
+    echo $shape->draw() . " ";
+}
+// Çıktı: Circle çizildi. Square çizildi.
+```
 
